@@ -82,6 +82,70 @@ bool Queue::StateExists(Puzzle *state) {
 }
 
 
+VisitedListQueue::VisitedListQueue() {
+	front = NULL;
+	rear = NULL;
+	count = 0;
+}
+VisitedListQueue::~VisitedListQueue() {
+}
+
+void VisitedListQueue::Join (string newthing) {
+	State *temp;
+	temp = new State;
+	temp->data = newthing;
+	temp->next = NULL;
+
+	if (rear != NULL) {
+		rear->next = temp;
+	}
+	rear = temp;
+	if (front == NULL) {
+		front = temp;
+	}
+	count++;
+}
+
+void VisitedListQueue::Leave() {
+	State *temp;
+	if (front == NULL) {
+		return;
+	}
+	temp = front;
+	front = front->next;
+	if (front == NULL) {
+		rear = NULL;
+	}
+	delete temp;
+	count--;
+}
+
+string VisitedListQueue::Front() {
+	return front->data;
+}
+
+bool VisitedListQueue::isEmpty() {
+	if (count == 0) {
+		return true;
+	}
+	return false;
+}
+
+int VisitedListQueue::QueueLength() {
+	return count;
+}
+
+bool VisitedListQueue::StateExists(Puzzle *state) {
+	State *current = front;
+	string givenState = state->getString();
+	while (current != NULL) {
+		if (givenState.compare(current->data) == 0) {
+			return true;
+		}
+		current = current->next;
+	}
+	return false;
+}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -212,14 +276,16 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 	maxQLength=0;
 
 	Queue *queue = new Queue();
-	Queue *visitedList = new Queue();
+	// Queue *visitedList = new Queue();
+	VisitedListQueue *visitedList = new VisitedListQueue();
 	Puzzle *p = new Puzzle(initialState, goalState);
 	Puzzle *state = p;
 	Puzzle *temp;
 	bool goalMatch = state->goalMatch();
 
 	numOfStateExpansions = 0;
-	visitedList->Join(p);
+	// visitedList->Join(p);
+	visitedList->Join(p->getString());
 
 	string tempPath;
 	int count = 0;
@@ -248,7 +314,7 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 				}
 			}
 
-			visitedList->Join(temp);
+			visitedList->Join(temp->getString());
 			//cout<<"L"<<endl;
 		}
 		if (state->canMoveUp() == true) {
@@ -277,7 +343,7 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 						// visitedList->Join(temp);
 					}
 				}
-				visitedList->Join(temp);
+				visitedList->Join(temp->getString());
 				//cout<<"U"<<endl;
 			}
 			if (state->canMoveRight() == true) {
@@ -300,7 +366,7 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 						// visitedList->Join(temp);
 					}
 				}
-				visitedList->Join(temp);
+				visitedList->Join(temp->getString());
 				//cout<<"R"<<endl;
 			}
 			if (state->canMoveDown() == true) {
@@ -323,7 +389,7 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 						// visitedList->Join(temp);
 					}
 				}
-				visitedList->Join(temp);
+				visitedList->Join(temp->getString());
 				//cout<<"D"<<endl;
 			}
 

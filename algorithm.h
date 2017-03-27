@@ -37,6 +37,28 @@ public:
 	bool StateExists(Puzzle *state);
 };
 
+struct State {
+	string data;
+	State *next;
+};
+
+/* implement your Queue class here */
+class VisitedListQueue {
+private:
+	State *front;
+	State *rear;
+	int count;
+public:
+	VisitedListQueue();
+	~VisitedListQueue();
+	void Join(string newthing);
+	void Leave();
+	string Front();
+	bool isEmpty();
+	int QueueLength();
+	bool StateExists(Puzzle *state);
+};
+
 
 //Function prototypes
 string progressiveDeepeningSearch_No_VisitedList(string const initialState, string const goalState, int &numOfStateExpansions, int& maxQLength, float &actualRunningTime, int ultimateMaxDepth);
