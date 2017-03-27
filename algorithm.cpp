@@ -117,22 +117,57 @@ string breadthFirstSearch(string const initialState, string const goalState, int
 	startTime = clock();
 
 	maxQLength=0;
+
+	string tempPath;
 	while (goalMatch == false) {
 		++numOfStateExpansions;
 		if (temp->canMoveLeft() == true) {
-			queue->Join(temp->moveLeft());
+			if (temp->getPathLength() > 0) {
+				tempPath = temp->getPath()[temp->getPathLength()-1];
+				if (tempPath.compare("R") != 0) {
+					queue->Join(temp->moveLeft());
+				}
+			}else {
+				queue->Join(temp->moveLeft());
+			}
+
 			//cout<<"L"<<endl;
 		}
 		if (temp->canMoveUp() == true) {
+			if (temp->getPathLength() > 0) {
+				tempPath = temp->getPath()[temp->getPathLength()-1];
+				if (tempPath.compare("D") != 0) {
+					queue->Join(temp->moveUp());
+				}
+			}else {
 				queue->Join(temp->moveUp());
+			}
+
+
 				//cout<<"U"<<endl;
 			}
 			if (temp->canMoveRight() == true) {
-				queue->Join(temp->moveRight());
+				if (temp->getPathLength() > 0) {
+					tempPath = temp->getPath()[temp->getPathLength()-1];
+					if (tempPath.compare("L") != 0) {
+						queue->Join(temp->moveRight());
+					}
+				}else {
+					queue->Join(temp->moveRight());
+				}
+
 				//cout<<"R"<<endl;
 			}
 			if (temp->canMoveDown() == true) {
-				queue->Join(temp->moveDown());
+				if (temp->getPathLength() > 0) {
+					tempPath = temp->getPath()[temp->getPathLength()-1];
+					if (tempPath.compare("U") != 0) {
+						queue->Join(temp->moveDown());
+					}
+				}else {
+					queue->Join(temp->moveDown());
+				}
+
 				//cout<<"D"<<endl;
 			}
 
@@ -186,37 +221,107 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 	numOfStateExpansions = 0;
 	visitedList->Join(p);
 
+	string tempPath;
+	int count = 0;
+
 	while (goalMatch == false) {
 		++numOfStateExpansions;
 		if (state->canMoveLeft() == true) {
+
 			temp = state->moveLeft();
-			if (visitedList->StateExists(temp) == false) {
-				queue->Join(temp);
+			if (state->getPathLength() > 0) {
+				tempPath = state->getPath()[state->getPathLength()-1];
+				if (tempPath.compare("R") != 0) {
+					if (visitedList->StateExists(temp) == false) {
+						queue->Join(temp);
+
+						// visitedList->Join(temp);
+					}
+				}else {
+					count++;
+				}
+			}else {
+				if (visitedList->StateExists(temp) == false) {
+					queue->Join(temp);
+
+					// visitedList->Join(temp);
+				}
 			}
+
 			visitedList->Join(temp);
 			//cout<<"L"<<endl;
 		}
 		if (state->canMoveUp() == true) {
 				temp = state->moveUp();
+				//
+				// if (visitedList->StateExists(temp) == false) {
+				// 	queue->Join(temp);
+				// }
+				// visitedList->Join(temp);
 
-				if (visitedList->StateExists(temp) == false) {
-					queue->Join(temp);
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("D") != 0) {
+						if (visitedList->StateExists(temp) == false) {
+							queue->Join(temp);
+
+							// visitedList->Join(temp);
+						}
+					}else {
+						count++;
+					}
+				}else {
+					if (visitedList->StateExists(temp) == false) {
+						queue->Join(temp);
+
+						// visitedList->Join(temp);
+					}
 				}
 				visitedList->Join(temp);
 				//cout<<"U"<<endl;
 			}
 			if (state->canMoveRight() == true) {
 				temp = state->moveRight();
-				if (visitedList->StateExists(temp) == false) {
-					queue->Join(temp);
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("L") != 0) {
+						if (visitedList->StateExists(temp) == false) {
+							queue->Join(temp);
+
+							// visitedList->Join(temp);
+						}
+					}else {
+						count++;
+					}
+				}else {
+					if (visitedList->StateExists(temp) == false) {
+						queue->Join(temp);
+
+						// visitedList->Join(temp);
+					}
 				}
 				visitedList->Join(temp);
 				//cout<<"R"<<endl;
 			}
 			if (state->canMoveDown() == true) {
 				temp = state->moveDown();
-				if (visitedList->StateExists(temp) == false) {
-					queue->Join(temp);
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("U") != 0) {
+						if (visitedList->StateExists(temp) == false) {
+							queue->Join(temp);
+
+							// visitedList->Join(temp);
+						}
+					}else {
+						count++;
+					}
+				}else {
+					if (visitedList->StateExists(temp) == false) {
+						queue->Join(temp);
+
+						// visitedList->Join(temp);
+					}
 				}
 				visitedList->Join(temp);
 				//cout<<"D"<<endl;
@@ -225,17 +330,22 @@ string breadthFirstSearch_with_VisitedList(string const initialState, string con
 			state = queue->Front();
 			queue->Leave();
 			goalMatch = state->goalMatch();
+
+			if (count % 10000 == 0) {
+
+				cout<<"COUNT: "<<count<<endl;
+			}
 	}
 
 	cout<<"ENDING"<<endl;
+	cout<<count<<endl;
+	path = state->getPath();
 
 	maxQLength=queue->MaxLength();
 	delete queue;
 	delete visitedList;
-
-	path = temp->getPath();
 	delete p;
-	cout<<path<<endl;
+	//cout<<path<<endl;
 //***********************************************************************************************************
 	actualRunningTime = ((float)(clock() - startTime)/CLOCKS_PER_SEC);
 	//path = "DDRRLLLUUU";  //this is just a dummy path for testing the function

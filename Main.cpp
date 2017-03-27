@@ -341,6 +341,9 @@ try{
 
     } else if(algorithmSelected == "breadth_first_search_vlist" ){
 
+      cout<<"INSIDE"<<endl;
+      cout<<"INSIDE"<<endl;
+
         path = breadthFirstSearch_with_VisitedList(initialState, goalState, numOfStateExpansions, maxQLength, actualRunningTime);
 
 
