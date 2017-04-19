@@ -78,7 +78,7 @@ void Puzzle::updateHCost(heuristicFunction hFunction){
 }
 
 void Puzzle::updateFCost(){
-	//fCost = ?
+	fCost = getGCost() + getHCost();
 }
 
 int Puzzle::getFCost(){
@@ -103,11 +103,41 @@ int Puzzle::h(heuristicFunction hFunction){
 	switch(hFunction){
 		case misplacedTiles:
 				//place your implementation here
-                h = numOfMisplacedTiles;
+				for(int i=0; i < 3; i++){
+					for(int j=0; j < 3; j++){
+						if (goalBoard[i][j] != 0 && goalBoard[i][j] != board[i][j]) {
+							numOfMisplacedTiles++;
+						}
+					}
+			  }
+
+            h = numOfMisplacedTiles;
 		        break;
 
 		case manhattanDistance:
 		        //place your implementation here
+						for(int i=0; i < 3; i++){
+							for(int j=0; j < 3; j++){
+								if (goalBoard[i][j] != 0 && goalBoard[i][j] != board[i][j] ) {
+									for (int x = 0; x<3; x++) {
+										for (int y = 0; y<3; y++) {
+											if (board[i][j] == goalBoard[x][y]) {
+												if (y>j) {
+													sum = sum + y - j;
+												}else {
+													sum = sum + j - y;
+												}
+												if (x > i) {
+													sum = sum + x - i;
+												} else {
+													sum = sum + i - x;
+												}
+											}
+										}
+									}
+								}
+							}
+					  }
 
 		        h = sum;
 		        break;
@@ -143,8 +173,6 @@ bool Puzzle::goalMatch(){
 	bool result=false;
 
     //this is incomplete...
-
-
 	for(int i=0; i < 3; i++){
 		for(int j=0; j < 3; j++){
 			if (goalBoard[i][j] != board[i][j]) {

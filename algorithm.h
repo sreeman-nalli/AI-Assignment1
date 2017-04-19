@@ -57,10 +57,62 @@ public:
 	bool isEmpty();
 	int QueueLength();
 	bool StateExists(Puzzle *state);
+	bool StrictExpandedListStateCheck(Puzzle *state);
+};
+
+class HashedVisitedList {
+private:
+	State *list[296];
+	int count;
+public:
+	HashedVisitedList() {
+		count = 0;
+		for (int i = 0; i<296; ++i) {
+			list[i] = NULL;
+		}
+	}
+	~HashedVisitedList() {}
+	void InsertString (string strState, int position);
+	bool StateExists(string strState, int position);
+	void TraverseList ();
 };
 
 
+
+class Heap {
+	private:
+		Puzzle *data[400000];
+		int last;
+		int compAdd;
+		int compDel;
+		int maxHeapLength;
+	public:
+		Heap() {
+			last = -1;
+			compAdd = 0;
+			compDel = 0;
+			maxHeapLength = 0;
+		};
+		~Heap() { };//destructor
+		void InsertHeap(Puzzle *state);
+		Puzzle * Delete();
+		int MaxHeapLenght() {return maxHeapLength;}
+		Puzzle *Front() {
+			return data[0];
+		}
+		int NumOfDeletionsFromHeap() {
+			return compDel;
+		}
+		void DeleteFromMiddle (int position);
+		void traverseStates(Puzzle *state);
+};
+
+
+
 //Function prototypes
+
+int generateHashKey (Puzzle * state);
+
 string progressiveDeepeningSearch_No_VisitedList(string const initialState, string const goalState, int &numOfStateExpansions, int& maxQLength, float &actualRunningTime, int ultimateMaxDepth);
 string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initialState, string const goalState, int &numOfStateExpansions, int& maxQLength, float &actualRunningTime, int ultimateMaxDepth);
 
