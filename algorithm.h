@@ -29,7 +29,9 @@ public:
 	Queue();
 	~Queue();
 	void Join(Puzzle *newthing);
+	void AddToFront (Puzzle *newthing);
 	void Leave();
+	void LeaveWithoutDelete();
 	Puzzle * Front();
 	bool isEmpty();
 	int QueueLength();

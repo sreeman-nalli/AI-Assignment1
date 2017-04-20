@@ -35,6 +35,21 @@ void Queue::Join (Puzzle *newthing) {
 	}
 }
 
+
+void Queue::AddToFront (Puzzle *newthing) {
+	Node *temp;
+	temp = new Node;
+	temp->data = newthing;
+	temp->next = front;
+	front = temp;
+
+	count++;
+	if (maxQLen < count) {
+		maxQLen = count;
+	}
+}
+
+
 void Queue::Leave() {
 	Node *temp;
 	if (front == NULL) {
@@ -573,7 +588,6 @@ string breadthFirstSearch(string const initialState, string const goalState, int
 		path = temp->getPath();
 
 		delete p;
-		cout<<path<<endl;
 		return path;
 
 }
@@ -812,30 +826,99 @@ string progressiveDeepeningSearch_No_VisitedList(string const initialState, stri
 	clock_t startTime;
     //add necessary variables here
 
-		Puzzle *p = new Puzzle(initialState, goalState);
-
-		cout<<"toString: "<<p->toString()<<endl;
-		cout<<"getString: "<<p->getString()<<endl;
-
-		p = p->moveRight();
-
-		cout<<"toString: "<<p->toString()<<endl;
-		cout<<"getString: "<<p->getString()<<endl;
-
     //algorithm implementation
 	// cout << "------------------------------" << endl;
  //    cout << "<<progressiveDeepeningSearch_No_VisitedList>>" << endl;
  //    cout << "------------------------------" << endl;
 
-	startTime = clock();
+startTime = clock();
+
+	Queue *queue = new Queue();
+	 Puzzle *p = new Puzzle(initialState, goalState);
+	//  Puzzle *p = new Puzzle("123840765", goalState);
+	// Puzzle *temp = p;
+	Puzzle *temp;
+	bool goalMatch = p->goalMatch();
+	numOfStateExpansions = 0;
 
 	maxQLength=0;
+	string tempPath;
+	int pdsDepth = 1;
+	queue->AddToFront(p);
+
+	Puzzle *newP = NULL;
+
+	while (goalMatch == false) {
+		if (queue->isEmpty()) {
+			//delete queue;
+			//queue = new Queue();
+			// queue->AddToFront(new Puzzle(initialState, goalState));
+			newP = new Puzzle(initialState, goalState);
+			queue->AddToFront(newP);
+			pdsDepth++;
+			cout<<"DEPTH: "<<pdsDepth<<endl;
+		}
+
+		temp = queue->Front();
+		queue->Leave();
+		goalMatch = temp->goalMatch();
+		++numOfStateExpansions;
+
+		if (temp->canMoveLeft(pdsDepth) == true) {
+			if (temp->getPathLength() > 0) {
+				tempPath = temp->getPath()[temp->getPathLength()-1];
+				if (tempPath.compare("R") != 0) {
+					queue->AddToFront(temp->moveLeft());
+				}
+			}else {
+				queue->AddToFront(temp->moveLeft());
+			}
+		}
+		if (temp->canMoveUp(pdsDepth) == true) {
+			if (temp->getPathLength() > 0) {
+				tempPath = temp->getPath()[temp->getPathLength()-1];
+				if (tempPath.compare("D") != 0) {
+					queue->AddToFront(temp->moveUp());
+				}
+			}else {
+				queue->AddToFront(temp->moveUp());
+			}
+		}
+		if (temp->canMoveRight(pdsDepth) == true) {
+				if (temp->getPathLength() > 0) {
+					tempPath = temp->getPath()[temp->getPathLength()-1];
+					if (tempPath.compare("L") != 0) {
+						queue->AddToFront(temp->moveRight());
+					}
+				}else {
+					queue->AddToFront(temp->moveRight());
+				}
+		}
+		if (temp->canMoveDown(pdsDepth) == true) {
+				if (temp->getPathLength() > 0) {
+					tempPath = temp->getPath()[temp->getPathLength()-1];
+					if (tempPath.compare("U") != 0) {
+						queue->AddToFront(temp->moveDown());
+					}
+				}else {
+					queue->AddToFront(temp->moveDown());
+				}
+		}
+		delete temp;
+	}
+
+	cout<<"ENDDD"<<endl;
+
+	maxQLength=queue->MaxLength();
+	delete queue;
 
 
 //***********************************************************************************************************
 	actualRunningTime = ((float)(clock() - startTime)/CLOCKS_PER_SEC);
-	path = "DDRRLLLUUU";  //this is just a dummy path for testing the function
+
+	path = temp->getPath();
 	return path;
+
 
 }
 
@@ -861,13 +944,233 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
  //    cout << "------------------------------" << endl;
 
 	startTime = clock();
-
 	maxQLength=0;
+
+	Queue *queue = new Queue();
+	HashedVisitedList *visitedList = new HashedVisitedList();
+	// VisitedListQueue *visitedList = new VisitedListQueue();
+
+	Puzzle *p = new Puzzle(initialState, goalState);
+	Puzzle *state = NULL;
+	Puzzle *temp;
+	bool goalMatch = p->goalMatch();
+
+	queue->AddToFront(p);
+	numOfStateExpansions = 0;
+
+	int position = generateHashKey(p->getString());
+	visitedList->InsertString(p->getString(), position);
+
+	int pdsDepth = 1;
+	// visitedList->Join(p->getString());
+
+	string tempPath;
+	int count = 0;
+	Puzzle *newP = NULL;
+
+	while (goalMatch == false) {
+	// for (int i = 0; i<10; i++) {
+		if (queue->isEmpty()) {
+			//delete queue;
+			//queue = new Queue();
+			// queue->AddToFront(new Puzzle(initialState, goalState));
+			state = NULL;
+			delete visitedList;
+			visitedList = new HashedVisitedList();
+			position = generateHashKey(p->getString());
+			visitedList->InsertString(p->getString(), position);
+
+			newP = new Puzzle(initialState, goalState);
+			queue->AddToFront(newP);
+			pdsDepth++;
+			cout<<"DEPTH: "<<pdsDepth<<endl;
+		}
+		// cout<<"1"<<endl;
+		state = queue->Front();
+		queue->Leave();
+		goalMatch = state->goalMatch();
+
+		if (goalMatch == true) {
+			break;
+		}
+		++numOfStateExpansions;
+		// cout<<"2"<<endl;
+
+		if (state->canMoveLeft(pdsDepth) == true) {
+			// cout<<"3.1"<<endl;
+			// temp = state->moveLeft();
+			if (state->getPathLength() > 0) {
+				tempPath = state->getPath()[state->getPathLength()-1];
+				if (tempPath.compare("R") != 0) {
+					temp = state->moveLeft();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }else {
+					// 	count++;
+					// 	delete temp;
+					// }
+					position = generateHashKey(temp->getString());
+					if (visitedList->StateExists(temp->getString(), position) == false) {
+						queue->AddToFront(temp);
+						visitedList->InsertString(temp->getString(),position);
+					}else {
+						count++;
+						delete temp;
+					}
+
+				}else {
+					count++;
+				}
+			}else {
+				// cout<<"3.2"<<endl;
+				temp = state->moveLeft();
+				// if (visitedList->StateExists(temp) == false) {
+				// 	queue->Join(temp);
+				// 	visitedList->Join(temp->getString());
+				// }
+				position = generateHashKey(temp->getString());
+				if (visitedList->StateExists(temp->getString(), position) == false) {
+					queue->AddToFront(temp);
+					visitedList->InsertString(temp->getString(),position);
+				}else {
+					delete temp;
+				}
+			}
+			// visitedList->Join(temp->getString());
+		}
+		if (state->canMoveUp(pdsDepth) == true) {
+			// cout<<"4.1"<<endl;
+				// temp = state->moveUp();
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("D") != 0) {
+						temp = state->moveUp();
+						// if (visitedList->StateExists(temp) == false) {
+						// 	queue->Join(temp);
+						// 	visitedList->Join(temp->getString());
+						// }
+						position = generateHashKey(temp->getString());
+						if (visitedList->StateExists(temp->getString(), position) == false) {
+							queue->AddToFront(temp);
+							visitedList->InsertString(temp->getString(),position);
+						}else {
+							count++;
+							delete temp;
+						}
+					}else {
+						count++;
+					}
+				}else {
+					// cout<<"4.2"<<endl;
+					temp = state->moveUp();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					position = generateHashKey(temp->getString());
+					if (visitedList->StateExists(temp->getString(), position) == false) {
+						queue->AddToFront(temp);
+						visitedList->InsertString(temp->getString(),position);
+					}else {
+						delete temp;
+					}
+				}
+				// visitedList->Join(temp->getString());
+			}
+			if (state->canMoveRight(pdsDepth) == true) {
+				// cout<<"5.1"<<endl;
+				// temp = state->moveRight();
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("L") != 0) {
+						temp = state->moveRight();
+						// if (visitedList->StateExists(temp) == false) {
+						// 	queue->Join(temp);
+						// 	visitedList->Join(temp->getString());
+						// }
+						position = generateHashKey(temp->getString());
+						if (visitedList->StateExists(temp->getString(), position) == false) {
+							queue->AddToFront(temp);
+							visitedList->InsertString(temp->getString(),position);
+						}else {
+							count++;
+							delete temp;
+						}
+					}else {
+						count++;
+					}
+				}else {
+					temp = state->moveRight();
+					// cout<<"5.2"<<endl;
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					position = generateHashKey(temp->getString());
+					if (visitedList->StateExists(temp->getString(), position) == false) {
+						queue->AddToFront(temp);
+						visitedList->InsertString(temp->getString(),position);
+					}else {
+						delete temp;
+					}
+				}
+				// visitedList->Join(temp->getString());
+			}
+			if (state->canMoveDown(pdsDepth) == true) {
+				// cout<<"6.1"<<endl;
+				// temp = state->moveDown();
+				if (state->getPathLength() > 0) {
+					tempPath = state->getPath()[state->getPathLength()-1];
+					if (tempPath.compare("U") != 0) {
+						temp = state->moveDown();
+						// if (visitedList->StateExists(temp) == false) {
+						// 	queue->Join(temp);
+						// 	visitedList->Join(temp->getString());
+						// }
+						position = generateHashKey(temp->getString());
+						if (visitedList->StateExists(temp->getString(), position) == false) {
+							queue->AddToFront(temp);
+							visitedList->InsertString(temp->getString(),position);
+						}else {
+							count++;
+							delete temp;
+						}
+					}else {
+						count++;
+					}
+				}else {
+					// cout<<"6.2"<<endl;
+					temp = state->moveDown();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					position = generateHashKey(temp->getString());
+					if (visitedList->StateExists(temp->getString(), position) == false) {
+						queue->AddToFront(temp);
+						visitedList->InsertString(temp->getString(),position);
+					}else {
+						delete temp;
+					}
+				}
+				// visitedList->Join(temp->getString());
+				delete state;
+			}
+	}
+
+	cout<<"ENDING"<<endl;
+	// cout<<count<<endl;
+	path = state->getPath();
+
+	maxQLength=queue->MaxLength();
+	delete queue;
+	delete visitedList;
 
 
 //***********************************************************************************************************
     actualRunningTime = ((float)(clock() - startTime)/CLOCKS_PER_SEC);
-	path = "DDRRLLLUUU"; //this is just a dummy path for testing the function
+	// path = "DDRRLLLUUU"; //this is just a dummy path for testing the function
 
 	return path;
 

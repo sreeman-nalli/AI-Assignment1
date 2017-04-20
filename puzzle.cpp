@@ -217,18 +217,44 @@ bool Puzzle::canMoveDown(){
 
 bool Puzzle::canMoveLeft(int maxDepth){
   	//put your implementations here
+		if(depth < maxDepth){
+			return (x0 > 0);
+		}else {
+			return false;
+
+		}
+
 }
 bool Puzzle::canMoveRight(int maxDepth){
    //put your implementations here
+	 if(depth < maxDepth){
+		 return (x0 < 2);
+	 }else {
+		 return false;
+
+	 }
 }
 
 
 bool Puzzle::canMoveUp(int maxDepth){
    //put your implementations here
+	 if(depth < maxDepth){
+		 return (y0 > 0);
+	 }else {
+		 return false;
+
+	 }
 }
 
 bool Puzzle::canMoveDown(int maxDepth){
    //put your implementations here
+
+	 if(depth < maxDepth){
+		 return (y0 < 2);
+	 }else {
+		 return false;
+
+	 }
 }
 
 ///////////////////////////////////////////////
