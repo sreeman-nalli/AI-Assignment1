@@ -68,7 +68,6 @@ public:
     Puzzle * moveUp();
     Puzzle * moveDown();
 
-
     const string getPath();
 
     void setDepth(int d);

@@ -75,7 +75,9 @@ public:
 	}
 	~HashedVisitedList() {}
 	void InsertString (string strState, int position);
+	void InsertString (string strState, int position, int stateDepth);
 	bool StateExists(string strState, int position);
+	bool StateExists(string strState, int position, int stateDepth);
 	void TraverseList ();
 };
 

@@ -469,6 +469,54 @@ bool HashedVisitedList::StateExists(string strState, int position) {
 	return false;
 }
 
+
+void HashedVisitedList::InsertString (string strState, int position, int stateDepth) {
+	ostringstream tempStr;
+	tempStr << stateDepth;
+	strState = strState + tempStr.str();
+	if (list[position] == NULL) {
+		list[position] = new State();
+		list[position]->data = strState;
+		list[position]->next = NULL;
+	}else {
+		State *temp = list[position];
+		while (temp->next != NULL) {
+			temp = temp->next;
+		}
+		temp->next = new State();
+		temp = temp->next;
+		temp->data = strState;
+		temp->next = NULL;
+	}
+}
+
+
+bool HashedVisitedList::StateExists(string strState, int position, int stateDepth) {
+	State *temp = list[position];
+	State *prev = NULL;
+	string tmp;
+	string tempStr;
+	int length = 0;
+	int existingDepth = 0;
+	ostringstream newStateDepth;
+
+	while (temp != NULL) {
+		tmp = temp->data;
+		if (strState.compare(tmp.substr(0,9)) == 0) {
+			length = tmp.length();
+			istringstream tmpDepth(tmp.substr(9,length-9));
+			tmpDepth >> existingDepth;
+			if (existingDepth > stateDepth) {
+				newStateDepth << stateDepth;
+				temp->data = tmp.substr(0,9) + newStateDepth.str();
+			}
+			return true;
+		}
+		prev = temp;
+		temp = temp->next;
+	}
+}
+
 void HashedVisitedList::TraverseList() {
 	for (int i =0; i < 296; ++i) {
 		if (list[i] != NULL) {
@@ -962,7 +1010,6 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 	visitedList->InsertString(p->getString(), position);
 
 	int pdsDepth = 1;
-	// visitedList->Join(p->getString());
 
 	string tempPath;
 	int count = 0;
