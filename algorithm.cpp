@@ -226,19 +226,22 @@ void Heap::InsertHeap (Puzzle *state) {
 	if (maxHeapLength < last) {
 		maxHeapLength = last;
 	}
-
+	int middleSwapCount = 0;
 	// Fix the heap before leaving.
 	int child_index = last;
 	int par_index = 0;
 	bool swapping = true;
 	bool downSwapping = false;
-	int startDownSwappingPosition = 0;
+	// int startDownSwappingPosition = 0;
+	int startDownSwappingPosition[10];
 	string childStr;
 	string parStr;
 	int rightindex = 0;
 	int leftindex = 0;
-	while (swapping == true) {
-		swapping = false;
+
+	// while (swapping == true) {
+		// swapping = false;
+	while (true) {
 		if(child_index % 2 == 0) {
 			par_index = (child_index / 2) - 1; 	// Right child
 		} else {
@@ -253,20 +256,34 @@ void Heap::InsertHeap (Puzzle *state) {
 			if (childStr.compare(parStr) == 0) {
 				downSwapping = true;
 				//cout<<"DSwap"<<endl;
-				startDownSwappingPosition = child_index;
+				// startDownSwappingPosition = child_index;
+				if (data[child_index]->getFCost() < data[par_index]->getFCost()) {
+					startDownSwappingPosition[middleSwapCount] = child_index;
+					middleSwapCount++;
+				}
 			}
 
 			if (data[child_index]->getFCost() < data[par_index]->getFCost()) {
 				swap(data[child_index], data[par_index]);
-				swapping = true;
-				child_index = par_index;
+				// swapping = true;
+				// child_index = par_index;
 			}
+			//mychange below need to remove
+			child_index = par_index;
+			///////////////////
+		}else {
+			break;
 		}
 	}
 
 	//REORDER THE DOWN SWAP
 	if (downSwapping == true) {
-		this->DeleteFromMiddle(startDownSwappingPosition);
+		// cout<<"COUNT: "<<middleSwapCount<<endl;
+		// this->DeleteFromMiddle(startDownSwappingPosition);
+
+		for (int i = 0; i<middleSwapCount; i++) {
+			this->DeleteFromMiddle(startDownSwappingPosition[i]);
+		}
 	}
 }
 
@@ -284,67 +301,7 @@ void Heap::DeleteFromMiddle(int position) {
 	delete temp;
 
 	// Fix the heap.
-	int parindex = 0;
-	int leftindex = (parindex * 2) + 1;		// Left child
-	int rightindex = (parindex * 2) + 2;	// Right child
-
-	int parentIndexCost = data[parindex]->getFCost();
-	int leftIndexCost, rightIndexCost;
-	if (leftindex < last) {
-		compDel++;
-		 leftIndexCost = data[leftindex]->getFCost();
-	}else {
-		leftIndexCost = 99999;
-	}
-	if (rightindex < last) {
-		compDel++;
-		rightIndexCost = data[rightindex]->getFCost();
-	}else {
-		rightIndexCost = 99999;
-	}
-
-	while (parentIndexCost > leftIndexCost || parentIndexCost > rightIndexCost){
-		// cout<<"2"<<endl;
-		if (rightIndexCost > leftIndexCost) { 	// Follow left.
-			//printf("Swap data[%d]=%d with data[%d]=%d \n",leftindex, data[leftindex], parindex, data[parindex]);
-			swap(data[leftindex], data[parindex]);
-			parindex = leftindex;
-		}
-		else { 													// Else, follow right.
-			//printf("Swap data[%d]=%d with data[%d]=%d \n",rightindex, data[rightindex], parindex, data[parindex]);
-			swap(data[rightindex], data[parindex]);
-			parindex = rightindex;
-		}
-		// cout<<"3"<<endl;
-		leftindex = (parindex * 2) + 1;
-		rightindex = (parindex * 2) + 2;
-
-		parentIndexCost = data[parindex]->getFCost();
-		if (leftindex < last) {
-			compDel++;
-			 leftIndexCost = data[leftindex]->getFCost();
-		}else {
-			leftIndexCost = 99999;
-		}
-		if (rightindex < last) {
-			compDel++;
-			rightIndexCost = data[rightindex]->getFCost();
-		}else {
-			rightIndexCost = 99999;
-		}
-
-		if (leftindex > last) {
-			break;
-		} else {
-			if (rightindex > last) {
-				compDel++;
-				if (parentIndexCost > leftIndexCost) {
-					swap(data[parindex], data[leftindex]);
-				}
-				break;
-			}
-		}
-	}
+	this->FixHeap();
 }
 
 // Delete - remove the root, and return the value.
@@ -369,13 +326,17 @@ Puzzle * Heap::Delete(){
 	last--;
 
 	// Fix the heap.
-	int parindex=0;
+	this->FixHeap();
+	return temp;
+}
+
+void Heap::FixHeap(){
+	int parindex = 0;
 	int leftindex = (parindex * 2) + 1;		// Left child
 	int rightindex = (parindex * 2) + 2;	// Right child
 
 	int parentIndexCost = data[parindex]->getFCost();
 	int leftIndexCost, rightIndexCost;
-
 	if (leftindex < last) {
 		compDel++;
 		 leftIndexCost = data[leftindex]->getFCost();
@@ -392,16 +353,13 @@ Puzzle * Heap::Delete(){
 	while (parentIndexCost > leftIndexCost || parentIndexCost > rightIndexCost){
 		// cout<<"2"<<endl;
 		if (rightIndexCost > leftIndexCost) { 	// Follow left.
-			//printf("Swap data[%d]=%d with data[%d]=%d \n",leftindex, data[leftindex], parindex, data[parindex]);
 			swap(data[leftindex], data[parindex]);
 			parindex = leftindex;
 		}
 		else { 													// Else, follow right.
-			//printf("Swap data[%d]=%d with data[%d]=%d \n",rightindex, data[rightindex], parindex, data[parindex]);
 			swap(data[rightindex], data[parindex]);
 			parindex = rightindex;
 		}
-		// cout<<"3"<<endl;
 		leftindex = (parindex * 2) + 1;
 		rightindex = (parindex * 2) + 2;
 
@@ -431,8 +389,6 @@ Puzzle * Heap::Delete(){
 			}
 		}
 	}
-
-	return temp;
 }
 
 
@@ -470,7 +426,7 @@ bool HashedVisitedList::StateExists(string strState, int position) {
 }
 
 
-void HashedVisitedList::InsertString (string strState, int position, int stateDepth) {
+void HashedVisitedList::InsertStringPDS(string strState, int position, int stateDepth) {
 	ostringstream tempStr;
 	tempStr << stateDepth;
 	strState = strState + tempStr.str();
@@ -491,30 +447,49 @@ void HashedVisitedList::InsertString (string strState, int position, int stateDe
 }
 
 
-bool HashedVisitedList::StateExists(string strState, int position, int stateDepth) {
-	State *temp = list[position];
-	State *prev = NULL;
+bool HashedVisitedList::StateExistsPDS(string strState, int position, int stateDepth) {
+	State *current = list[position];
+	State *prev = list[position];
 	string tmp;
 	string tempStr;
 	int length = 0;
 	int existingDepth = 0;
 	ostringstream newStateDepth;
+	bool exists = false;
 
-	while (temp != NULL) {
-		tmp = temp->data;
+	while (current != NULL) {
+		tmp = current->data;
 		if (strState.compare(tmp.substr(0,9)) == 0) {
 			length = tmp.length();
 			istringstream tmpDepth(tmp.substr(9,length-9));
 			tmpDepth >> existingDepth;
-			if (existingDepth > stateDepth) {
+			if (stateDepth < existingDepth) {
 				newStateDepth << stateDepth;
-				temp->data = tmp.substr(0,9) + newStateDepth.str();
+				// current->data = tmp.substr(0,9) + newStateDepth.str();
+				current->data = strState + newStateDepth.str();
+				return false;
+			}else if (stateDepth == existingDepth){
+				return false;
+			}else {
+				return true;
 			}
-			return true;
 		}
-		prev = temp;
-		temp = temp->next;
+		prev = current;
+		current = current->next;
 	}
+
+	newStateDepth << stateDepth;
+	strState = strState + newStateDepth.str();
+	current = new State();
+	current->data = strState;
+	current->next = NULL;
+
+	if (prev == NULL) {
+		list[position] = current;
+	}else {
+		prev->next = current;
+	}
+	return false;
 }
 
 void HashedVisitedList::TraverseList() {
@@ -523,6 +498,61 @@ void HashedVisitedList::TraverseList() {
 			cout<<list[i]->data<<" Pos: "<<i<<endl;
 		}
 	}
+}
+
+
+
+void HashedVisitedListPDS::InsertStringPDS(string strState, int position, int stateDepth) {
+	if (list[position] == NULL) {
+		list[position] = new StatePDS();
+		list[position]->data = strState;
+		list[position]->depth = stateDepth;
+		list[position]->next = NULL;
+	}else {
+		StatePDS *temp = list[position];
+		while (temp->next != NULL) {
+			temp = temp->next;
+		}
+		temp->next = new StatePDS();
+		temp = temp->next;
+		temp->data = strState;
+		temp->depth = stateDepth;
+		temp->next = NULL;
+	}
+}
+
+
+bool HashedVisitedListPDS::StateExistsPDS(string strState, int position, int stateDepth) {
+	StatePDS *current = list[position];
+	StatePDS *prev = list[position];
+	string tmp;
+	bool exists = false;
+
+	while (current != NULL) {
+		tmp = current->data;
+		if (strState.compare(tmp) == 0) {
+			if (stateDepth <= current->depth) {
+				current->depth = stateDepth;
+				return false;
+			}else {
+				return true;
+			}
+		}
+		prev = current;
+		current = current->next;
+	}
+
+	current = new StatePDS();
+	current->data = strState;
+	current->depth = stateDepth;
+	current->next = NULL;
+
+	if (prev == NULL) {
+		list[position] = current;
+	}else {
+		prev->next = current;
+	}
+	return false;
 }
 
 int generateHashKey (string strState) {
@@ -995,7 +1025,7 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 	maxQLength=0;
 
 	Queue *queue = new Queue();
-	HashedVisitedList *visitedList = new HashedVisitedList();
+	HashedVisitedListPDS *visitedList = new HashedVisitedListPDS();
 	// VisitedListQueue *visitedList = new VisitedListQueue();
 
 	Puzzle *p = new Puzzle(initialState, goalState);
@@ -1005,29 +1035,29 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 
 	queue->AddToFront(p);
 	numOfStateExpansions = 0;
+	string statePath;
 
-	int position = generateHashKey(p->getString());
-	visitedList->InsertString(p->getString(), position);
+	statePath = p->getString();
+	int position = generateHashKey(statePath);
+	visitedList->InsertStringPDS(statePath, position, 0);
 
 	int pdsDepth = 1;
 
 	string tempPath;
-	int count = 0;
 	Puzzle *newP = NULL;
 
 	while (goalMatch == false) {
 	// for (int i = 0; i<10; i++) {
 		if (queue->isEmpty()) {
-			//delete queue;
-			//queue = new Queue();
-			// queue->AddToFront(new Puzzle(initialState, goalState));
 			state = NULL;
 			delete visitedList;
-			visitedList = new HashedVisitedList();
-			position = generateHashKey(p->getString());
-			visitedList->InsertString(p->getString(), position);
 
 			newP = new Puzzle(initialState, goalState);
+			visitedList = new HashedVisitedListPDS();
+
+			statePath = newP->getString();
+			position = generateHashKey(statePath);
+			visitedList->InsertStringPDS(statePath, position, 0);
 			queue->AddToFront(newP);
 			pdsDepth++;
 			cout<<"DEPTH: "<<pdsDepth<<endl;
@@ -1037,11 +1067,134 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 		queue->Leave();
 		goalMatch = state->goalMatch();
 
-		if (goalMatch == true) {
+		if (goalMatch) {
 			break;
 		}
 		++numOfStateExpansions;
 		// cout<<"2"<<endl;
+
+		if (state->canMoveDown(pdsDepth) == true) {
+			// cout<<"6.1"<<endl;
+			// temp = state->moveDown();
+			if (state->getPathLength() > 0) {
+				tempPath = state->getPath()[state->getPathLength()-1];
+				if (tempPath.compare("U") != 0) {
+					temp = state->moveDown();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					statePath = temp->getString();
+					position = generateHashKey(statePath);
+					if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+						queue->AddToFront(temp);
+						// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+					}else {
+						delete temp;
+					}
+				}
+			}else {
+				// cout<<"6.2"<<endl;
+				temp = state->moveDown();
+				// if (visitedList->StateExists(temp) == false) {
+				// 	queue->Join(temp);
+				// 	visitedList->Join(temp->getString());
+				// }
+				statePath = temp->getString();
+				position = generateHashKey(statePath);
+				if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+					queue->AddToFront(temp);
+					// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+				}else {
+					delete temp;
+				}
+			}
+			// visitedList->Join(temp->getString());
+		}
+
+
+		if (state->canMoveRight(pdsDepth) == true) {
+			// cout<<"5.1"<<endl;
+			// temp = state->moveRight();
+			if (state->getPathLength() > 0) {
+				tempPath = state->getPath()[state->getPathLength()-1];
+				if (tempPath.compare("L") != 0) {
+					temp = state->moveRight();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					statePath = temp->getString();
+					position = generateHashKey(statePath);
+					if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+						queue->AddToFront(temp);
+						// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+					}else {
+						delete temp;
+					}
+				}
+			}else {
+				temp = state->moveRight();
+				// cout<<"5.2"<<endl;
+				// if (visitedList->StateExists(temp) == false) {
+				// 	queue->Join(temp);
+				// 	visitedList->Join(temp->getString());
+				// }
+				statePath = temp->getString();
+				position = generateHashKey(statePath);
+				if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+					queue->AddToFront(temp);
+					// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+				}else {
+					delete temp;
+				}
+			}
+			// visitedList->Join(temp->getString());
+		}
+
+		if (state->canMoveUp(pdsDepth) == true) {
+		// cout<<"4.1"<<endl;
+			// temp = state->moveUp();
+			if (state->getPathLength() > 0) {
+				tempPath = state->getPath()[state->getPathLength()-1];
+				if (tempPath.compare("D") != 0) {
+					temp = state->moveUp();
+					// if (visitedList->StateExists(temp) == false) {
+					// 	queue->Join(temp);
+					// 	visitedList->Join(temp->getString());
+					// }
+					statePath = temp->getString();
+					position = generateHashKey(statePath);
+					if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+						queue->AddToFront(temp);
+						// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+					}else {
+						delete temp;
+					}
+				}
+			}else {
+				// cout<<"4.2"<<endl;
+				temp = state->moveUp();
+				// if (visitedList->StateExists(temp) == false) {
+				// 	queue->Join(temp);
+				// 	visitedList->Join(temp->getString());
+				// }
+				// cout<<"4.2.1"<<endl;
+				statePath = temp->getString();
+				position = generateHashKey(statePath);
+				// cout<<"4.2.2"<<endl;
+				if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
+					// cout<<"4.2.3"<<endl;
+					queue->AddToFront(temp);
+					// cout<<"4.2.4"<<endl;
+					// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
+				}else {
+					delete temp;
+				}
+				// cout<<"4.2.3"<<endl;
+			}
+			// visitedList->Join(temp->getString());
+		}
 
 		if (state->canMoveLeft(pdsDepth) == true) {
 			// cout<<"3.1"<<endl;
@@ -1057,17 +1210,14 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 					// 	count++;
 					// 	delete temp;
 					// }
-					position = generateHashKey(temp->getString());
-					if (visitedList->StateExists(temp->getString(), position) == false) {
+					statePath = temp->getString();
+					position = generateHashKey(statePath);
+					if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
 						queue->AddToFront(temp);
-						visitedList->InsertString(temp->getString(),position);
+						// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
 					}else {
-						count++;
 						delete temp;
 					}
-
-				}else {
-					count++;
 				}
 			}else {
 				// cout<<"3.2"<<endl;
@@ -1076,134 +1226,20 @@ string progressiveDeepeningSearch_with_NonStrict_VisitedList(string const initia
 				// 	queue->Join(temp);
 				// 	visitedList->Join(temp->getString());
 				// }
-				position = generateHashKey(temp->getString());
-				if (visitedList->StateExists(temp->getString(), position) == false) {
+				statePath = temp->getString();
+				position = generateHashKey(statePath);
+				if (visitedList->StateExistsPDS(statePath, position, pdsDepth) == false) {
 					queue->AddToFront(temp);
-					visitedList->InsertString(temp->getString(),position);
+					// visitedList->InsertStringPDS(temp->getString(),position, pdsDepth);
 				}else {
 					delete temp;
 				}
 			}
 			// visitedList->Join(temp->getString());
 		}
-		if (state->canMoveUp(pdsDepth) == true) {
-			// cout<<"4.1"<<endl;
-				// temp = state->moveUp();
-				if (state->getPathLength() > 0) {
-					tempPath = state->getPath()[state->getPathLength()-1];
-					if (tempPath.compare("D") != 0) {
-						temp = state->moveUp();
-						// if (visitedList->StateExists(temp) == false) {
-						// 	queue->Join(temp);
-						// 	visitedList->Join(temp->getString());
-						// }
-						position = generateHashKey(temp->getString());
-						if (visitedList->StateExists(temp->getString(), position) == false) {
-							queue->AddToFront(temp);
-							visitedList->InsertString(temp->getString(),position);
-						}else {
-							count++;
-							delete temp;
-						}
-					}else {
-						count++;
-					}
-				}else {
-					// cout<<"4.2"<<endl;
-					temp = state->moveUp();
-					// if (visitedList->StateExists(temp) == false) {
-					// 	queue->Join(temp);
-					// 	visitedList->Join(temp->getString());
-					// }
-					position = generateHashKey(temp->getString());
-					if (visitedList->StateExists(temp->getString(), position) == false) {
-						queue->AddToFront(temp);
-						visitedList->InsertString(temp->getString(),position);
-					}else {
-						delete temp;
-					}
-				}
-				// visitedList->Join(temp->getString());
-			}
-			if (state->canMoveRight(pdsDepth) == true) {
-				// cout<<"5.1"<<endl;
-				// temp = state->moveRight();
-				if (state->getPathLength() > 0) {
-					tempPath = state->getPath()[state->getPathLength()-1];
-					if (tempPath.compare("L") != 0) {
-						temp = state->moveRight();
-						// if (visitedList->StateExists(temp) == false) {
-						// 	queue->Join(temp);
-						// 	visitedList->Join(temp->getString());
-						// }
-						position = generateHashKey(temp->getString());
-						if (visitedList->StateExists(temp->getString(), position) == false) {
-							queue->AddToFront(temp);
-							visitedList->InsertString(temp->getString(),position);
-						}else {
-							count++;
-							delete temp;
-						}
-					}else {
-						count++;
-					}
-				}else {
-					temp = state->moveRight();
-					// cout<<"5.2"<<endl;
-					// if (visitedList->StateExists(temp) == false) {
-					// 	queue->Join(temp);
-					// 	visitedList->Join(temp->getString());
-					// }
-					position = generateHashKey(temp->getString());
-					if (visitedList->StateExists(temp->getString(), position) == false) {
-						queue->AddToFront(temp);
-						visitedList->InsertString(temp->getString(),position);
-					}else {
-						delete temp;
-					}
-				}
-				// visitedList->Join(temp->getString());
-			}
-			if (state->canMoveDown(pdsDepth) == true) {
-				// cout<<"6.1"<<endl;
-				// temp = state->moveDown();
-				if (state->getPathLength() > 0) {
-					tempPath = state->getPath()[state->getPathLength()-1];
-					if (tempPath.compare("U") != 0) {
-						temp = state->moveDown();
-						// if (visitedList->StateExists(temp) == false) {
-						// 	queue->Join(temp);
-						// 	visitedList->Join(temp->getString());
-						// }
-						position = generateHashKey(temp->getString());
-						if (visitedList->StateExists(temp->getString(), position) == false) {
-							queue->AddToFront(temp);
-							visitedList->InsertString(temp->getString(),position);
-						}else {
-							count++;
-							delete temp;
-						}
-					}else {
-						count++;
-					}
-				}else {
-					// cout<<"6.2"<<endl;
-					temp = state->moveDown();
-					// if (visitedList->StateExists(temp) == false) {
-					// 	queue->Join(temp);
-					// 	visitedList->Join(temp->getString());
-					// }
-					position = generateHashKey(temp->getString());
-					if (visitedList->StateExists(temp->getString(), position) == false) {
-						queue->AddToFront(temp);
-						visitedList->InsertString(temp->getString(),position);
-					}else {
-						delete temp;
-					}
-				}
-				// visitedList->Join(temp->getString());
-				delete state;
-			}
+
+
+		delete state;
 	}
 
 	cout<<"ENDING"<<endl;
@@ -1278,19 +1314,24 @@ int ccount = 0;
 					if (tempPath.compare("R") != 0) {
 						temp->updateHCost(heuristic);
 						temp->updateFCost();
-						position = generateHashKey(state->getString());
-						if (visitedList->StateExists(state->getString(), position) == false) {
+						// position = generateHashKey(state->getString());
+						// if (visitedList->StateExists(state->getString(), position) == false) {
 							position = generateHashKey(temp->getString());
 							if (visitedList->StateExists(temp->getString(), position) == false) {
 								//IF State exists in heap and : 1) if fcost is lower, don't Insert
 								// 														: 2) Else Insert into heap
 								heap->InsertHeap(temp);
 								// visitedList->Join(temp->getString());
-								visitedList->InsertString(p->getString(),position);
+								// visitedList->InsertString(p->getString(),position);
+								// visitedList->InsertString(temp->getString(),position);
 							}else {
 								delete temp;
 							}
-						}
+						// }else {
+						// 	delete temp;
+						// }
+					}else {
+						delete temp;
 					}
 				}else {
 					temp->updateHCost(heuristic);
@@ -1301,7 +1342,8 @@ int ccount = 0;
 						// 														: 2) Else Insert into heap
 						heap->InsertHeap(temp);
 						// visitedList->Join(temp->getString());
-						visitedList->InsertString(p->getString(),position);
+						// visitedList->InsertString(p->getString(),position);
+						// visitedList->InsertString(temp->getString(),position);
 					}else {
 						delete temp;
 					}
@@ -1315,18 +1357,24 @@ int ccount = 0;
 						if (tempPath.compare("D") != 0) {
 							temp->updateHCost(heuristic);
 							temp->updateFCost();
-							if (visitedList->StateExists(state->getString(), position) == false) {
+							// position = generateHashKey(state->getString());
+							// if (visitedList->StateExists(state->getString(), position) == false) {
 								position = generateHashKey(temp->getString());
 								if (visitedList->StateExists(temp->getString(), position) == false) {
 									//IF State exists in heap and : 1) if fcost is lower, don't Insert
 									// 														: 2) Else Insert into heap
 									heap->InsertHeap(temp);
 									// visitedList->Join(temp->getString());
-									visitedList->InsertString(p->getString(),position);
+									// visitedList->InsertString(p->getString(),position);
+									// visitedList->InsertString(temp->getString(),position);
 								}else {
 									delete temp;
 								}
-							}
+							// }else {
+							// 	delete temp;
+							// }
+						}else {
+							delete temp;
 						}
 					}else {
 						temp->updateHCost(heuristic);
@@ -1337,7 +1385,8 @@ int ccount = 0;
 							// 														: 2) Else Insert into heap
 							heap->InsertHeap(temp);
 							// visitedList->Join(temp->getString());
-							visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(temp->getString(),position);
 						}else {
 							delete temp;
 						}
@@ -1350,18 +1399,24 @@ int ccount = 0;
 						if (tempPath.compare("L") != 0) {
 								temp->updateHCost(heuristic);
 								temp->updateFCost();
-								if (visitedList->StateExists(state->getString(), position) == false) {
+								// position = generateHashKey(state->getString());
+								// if (visitedList->StateExists(state->getString(), position) == false) {
 									position = generateHashKey(temp->getString());
 									if (visitedList->StateExists(temp->getString(), position) == false) {
 										//IF State exists in heap and : 1) if fcost is lower, don't Insert
 										// 														: 2) Else Insert into heap
 										heap->InsertHeap(temp);
 										// visitedList->Join(temp->getString());
-										visitedList->InsertString(p->getString(),position);
+										// visitedList->InsertString(p->getString(),position);
+										// visitedList->InsertString(temp->getString(),position);
 									}else {
 										delete temp;
 									}
-								}
+								// }else {
+								// 	delete temp;
+								// }
+						}else {
+							delete temp;
 						}
 					}else {
 						temp->updateHCost(heuristic);
@@ -1372,7 +1427,8 @@ int ccount = 0;
 							// 														: 2) Else Insert into heap
 							heap->InsertHeap(temp);
 							// visitedList->Join(temp->getString());
-							visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(temp->getString(),position);
 						}else {
 							delete temp;
 						}
@@ -1386,18 +1442,24 @@ int ccount = 0;
 						if (tempPath.compare("U") != 0) {
 							temp->updateHCost(heuristic);
 							temp->updateFCost();
-							if (visitedList->StateExists(state->getString(), position) == false) {
-								position = generateHashKey(temp->getString());
+							// position = generateHashKey(state->getString());
+							// if (visitedList->StateExists(state->getString(), position) == false) {
+								// position = generateHashKey(temp->getString());
 								if (visitedList->StateExists(temp->getString(), position) == false) {
 									//IF State exists in heap and : 1) if fcost is lower, don't Insert
 									// 														: 2) Else Insert into heap
 									heap->InsertHeap(temp);
 									// visitedList->Join(temp->getString());
-									visitedList->InsertString(p->getString(),position);
+									// visitedList->InsertString(p->getString(),position);
+									// visitedList->InsertString(temp->getString(),position);
 								}else {
 									delete temp;
 								}
-							}
+							// }else {
+							// 	delete temp;
+							// }
+						}else {
+							delete temp;
 						}
 					}else {
 						temp->updateHCost(heuristic);
@@ -1408,7 +1470,8 @@ int ccount = 0;
 							// 														: 2) Else Insert into heap
 							heap->InsertHeap(temp);
 							// visitedList->Join(temp->getString());
-							visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(p->getString(),position);
+							// visitedList->InsertString(temp->getString(),position);
 						}else {
 							delete temp;
 						}
@@ -1419,16 +1482,29 @@ int ccount = 0;
 				//delete state;
 
 				ccount++;
+				if (ccount%10000 == 0) {
+					std::cout << ccount << '\n';
+				}
 				//std::cout << ccount << '\n';
-				state = heap->Delete();
-				goalMatch = state->goalMatch();
-		// }
+				while (true) {
+					state = heap->Delete();
+					goalMatch = state->goalMatch();
+
+					position = generateHashKey(state->getString());
+					if (visitedList->StateExists(state->getString(), position) == false) {
+						visitedList->InsertString(state->getString(),position);
+						break;
+					}else {
+						delete state;
+					}
+				}
 	}
 
 	path = state->getPath();
 
 	maxQLength=heap->MaxHeapLenght();
 	numOfDeletionsFromMiddleOfHeap = heap->NumOfDeletionsFromHeap();
+	delete state;
 	delete heap;
 	delete visitedList;
 	delete p;
@@ -1438,70 +1514,3 @@ int ccount = 0;
 	return path;
 
 }
-
-
-// if (ccount == 16667) {
-// 541781
-// 	if (state->canMoveLeft() == true) {
-// 		temp = state->moveLeft();
-// 		temp->updateHCost(heuristic);
-// 		temp->updateFCost();
-//
-// 		position = generateHashKey(temp->getString());
-// 		cout<<"L Out"<<endl;
-// 		if (visitedList->StateExists(temp->getString(), position) == false) {
-// 			//IF State exists in heap and : 1) if fcost is lower, don't Insert
-// 			// 														: 2) Else Insert into heap
-// 			cout<<"L In"<<endl;
-// 			heap->InsertHeap(temp);
-// 			// visitedList->Join(temp->getString());
-// 			visitedList->InsertString(p->getString(),position);
-// 		}
-// 	} else if (state->canMoveUp() == true) {
-// 		temp = state->moveUp();
-// 		temp->updateHCost(heuristic);
-// 		temp->updateFCost();
-// 		position = generateHashKey(temp->getString());
-// 		cout<<"U Out"<<endl;
-// 		if (visitedList->StateExists(temp->getString(), position) == false) {
-// 			//IF State exists in heap and : 1) if fcost is lower, don't Insert
-// 			// 														: 2) Else Insert into heap
-// 			cout<<"U In"<<endl;
-// 			heap->InsertHeap(temp);
-// 			// visitedList->Join(temp->getString());
-// 			visitedList->InsertString(p->getString(),position);
-// 		}
-// 	} else if (state->canMoveRight() == true) {
-// 		temp = state->moveRight();
-// 		temp->updateHCost(heuristic);
-// 		temp->updateFCost();
-// 		position = generateHashKey(temp->getString());
-// 		cout<<"R Out"<<endl;
-// 		cout<<position<<endl;
-// 		cout<<temp->getString()<<endl;
-// 		if (visitedList->StateExists(temp->getString(), position) == false) {
-// 			//IF State exists in heap and : 1) if fcost is lower, don't Insert
-// 			// 														: 2) Else Insert into heap
-// 			cout<<"R In"<<endl;
-// 			heap->InsertHeap(temp);
-// 			// visitedList->Join(temp->getString());
-// 			visitedList->InsertString(p->getString(),position);
-// 		}
-// 		cout<<"R DOne"<<endl;
-// 	} else if (state->canMoveDown() == true) {
-// 		temp = state->moveDown();
-// 		temp->updateHCost(heuristic);
-// 		temp->updateFCost();
-// 		position = generateHashKey(temp->getString());
-// 		cout<<"D Out"<<endl;
-// 		if (visitedList->StateExists(temp->getString(), position) == false) {
-// 			//IF State exists in heap and : 1) if fcost is lower, don't Insert
-// 			// 														: 2) Else Insert into heap
-// 			cout<<"D In"<<endl;
-// 			heap->InsertHeap(temp);
-// 			// visitedList->Join(temp->getString());
-// 			visitedList->InsertString(p->getString(),position);
-// 		}
-// 	}
-// 	break;
-// }else {

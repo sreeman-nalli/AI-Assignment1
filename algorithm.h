@@ -12,6 +12,67 @@
 
 const heuristicFunction HEURISTIC_FUNCTION=manhattanDistance;
 
+//
+// int parindex=0;
+// int leftindex = (parindex * 2) + 1;		// Left child
+// int rightindex = (parindex * 2) + 2;	// Right child
+//
+// int parentIndexCost = data[parindex]->getFCost();
+// int leftIndexCost, rightIndexCost;
+//
+// if (leftindex < last) {
+// 	compDel++;
+// 	 leftIndexCost = data[leftindex]->getFCost();
+// }else {
+// 	leftIndexCost = 99999;
+// }
+// if (rightindex < last) {
+// 	compDel++;
+// 	rightIndexCost = data[rightindex]->getFCost();
+// }else {
+// 	rightIndexCost = 99999;
+// }
+//
+// while (parentIndexCost > leftIndexCost || parentIndexCost > rightIndexCost){
+// 	// cout<<"2"<<endl;
+// 	if (rightIndexCost > leftIndexCost) { 	// Follow left.
+// 		swap(data[leftindex], data[parindex]);
+// 		parindex = leftindex;
+// 	}
+// 	else { 													// Else, follow right.
+// 		swap(data[rightindex], data[parindex]);
+// 		parindex = rightindex;
+// 	}
+// 	leftindex = (parindex * 2) + 1;
+// 	rightindex = (parindex * 2) + 2;
+//
+// 	parentIndexCost = data[parindex]->getFCost();
+// 	if (leftindex < last) {
+// 		compDel++;
+// 		 leftIndexCost = data[leftindex]->getFCost();
+// 	}else {
+// 		leftIndexCost = 99999;
+// 	}
+// 	if (rightindex < last) {
+// 		compDel++;
+// 		rightIndexCost = data[rightindex]->getFCost();
+// 	}else {
+// 		rightIndexCost = 99999;
+// 	}
+//
+// 	if (leftindex > last) {
+// 		break;
+// 	} else {
+// 		if (rightindex > last) {
+// 			compDel++;
+// 			if (parentIndexCost > leftIndexCost) {
+// 				swap(data[parindex], data[leftindex]);
+// 			}
+// 			break;
+// 		}
+// 	}
+// }
+
 
 struct Node {
 	Puzzle *data;
@@ -75,10 +136,32 @@ public:
 	}
 	~HashedVisitedList() {}
 	void InsertString (string strState, int position);
-	void InsertString (string strState, int position, int stateDepth);
+	void InsertStringPDS(string strState, int position, int stateDepth);
 	bool StateExists(string strState, int position);
-	bool StateExists(string strState, int position, int stateDepth);
+	bool StateExistsPDS(string strState, int position, int stateDepth);
 	void TraverseList ();
+};
+
+struct StatePDS{
+	string data;
+	int depth;
+	StatePDS *next;
+};
+
+class HashedVisitedListPDS {
+private:
+	StatePDS *list[296];
+	int count;
+public:
+	HashedVisitedListPDS() {
+		count = 0;
+		for (int i = 0; i<296; ++i) {
+			list[i] = NULL;
+		}
+	}
+	~HashedVisitedListPDS() {}
+	void InsertStringPDS(string strState, int position, int stateDepth);
+	bool StateExistsPDS(string strState, int position, int stateDepth);
 };
 
 
@@ -99,6 +182,7 @@ class Heap {
 		};
 		~Heap() { };//destructor
 		void InsertHeap(Puzzle *state);
+		void FixHeap();
 		Puzzle * Delete();
 		int MaxHeapLenght() {return maxHeapLength;}
 		Puzzle *Front() {
